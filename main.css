@@ -42,6 +42,15 @@ margin-left: 25px;
   margin-left: 25px;
 }
 
+.response-correct{
+  width 90%;
+  height: 75px;
+  margin: 0 auto;
+  margin-top: 20px;
+  border: 1px solid #999;
+  border-radius: 5px;
+}
+
 nav{
   height: 75px;
   margin-top: 20px;
