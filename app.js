@@ -1,4 +1,4 @@
-var Quiz = {
+var QuizBank = {
   questions: [{question: "What is the moon made of?",
                 answers: [
                   "Cheese",
@@ -76,18 +76,49 @@ var Quiz = {
   currentCorrect: 0
 }
 
+TempQuiz = {questions:[],
+            currentQuestion: 0,
+            correctQuestion: function(answer) {
+              // alert("the answer selected is: " + answer);
+              // alert("the correct answer  is: " + this.questions[this.currentQuestion].correctAnswer);
+              var CorrectAnswer = this.questions[this.currentQuestion].correctAnswer;
+              if(answer === CorrectAnswer) {
+                renderAnswer(1, CorrectAnswer);//correct
+              } else {
+                renderAnswer(0, CorrectAnswer);//incorrect
+              }
+            }
+};
+
 //State Modification functions
-var numCorrect = function(Quiz){
-  Quiz.currentCorrect++;
+function initalizeTempQuiz() {
+  var questionOrderInArray = generateUniqueQuestionSet(5);
+    questionOrderInArray.forEach(function(questionNum) {
+      TempQuiz.questions.push(QuizBank.questions[questionNum]);
+      // alert(questionOrderInArray);
+      return 5;
+    });
+}
+
+function runQuizModule() {
+  numQuestions = initalizeTempQuiz();
+  var currentQuestion = TempQuiz.currentQuestion;
+  renderQuestion(TempQuiz, currentQuestion, $(".js-question-block"));
+
+  // alert(TempQuiz.questions[0].question);
+}
+
+var numCorrect = function(TempQuiz){
+  TempQuiz.currentCorrect++;
 };
 
 //render functions
-var renderQuestion = function(Quiz, questionNumber, element){
-  var question = Quiz.questions[questionNumber].question;
-  var answer1 = Quiz.questions[questionNumber].answers[0];
-  var answer2 = Quiz.questions[questionNumber].answers[1];
-  var answer3 = Quiz.questions[questionNumber].answers[2];
-  var answer4 = Quiz.questions[questionNumber].answers[3];
+var renderQuestion = function(TempQuiz, questionNumber, element){
+  var question = TempQuiz.questions[questionNumber].question;
+  var answer1 = TempQuiz.questions[questionNumber].answers[0];
+  var answer2 = TempQuiz.questions[questionNumber].answers[1];
+  var answer3 = TempQuiz.questions[questionNumber].answers[2];
+  var answer4 = TempQuiz.questions[questionNumber].answers[3];
 
   var questionHTML  = `
   <div class="theQuestion">
@@ -101,42 +132,58 @@ var renderQuestion = function(Quiz, questionNumber, element){
     <input type="radio" class="radioAns js-radio4" name="answer" value="Answer 4"><span class ="answer-text js-answer-text">${answer4}</span><br>
   </div>
   `;
-
   element.html(questionHTML);
 }
 
-TempQuiz = {};
+var renderAnswer = function(correct, correctAnswer) {
+  alert("Correct: " + correct);
+  alert(correctAnswer);
 
-
-var renderAnswer = function(Quiz, questionNumber, element) {
-  var question = Quiz.questions[questionNumber].correctAnswer;
-
-
+  var element = $(".js-response-correct");
+  var correctHTML = `
+  <h2 class="correct">You Answered Correctly!</h2>
+  <p>The answer is: ${correctAnswer}</p>
+  `;
+  var incorrectHTML = `
+  <h2 class="incorrect">You are WRONG!</h2>
+  <p>The answer is: ${correctAnswer}</p>
+  `;
+  if(correct){
+    element.html(correctHTML);
+  } else {
+    element.html(incorrectHTML);
+  }
 }
 
 $(function(){
 
-  $(".js-question").text(Quiz.questions[0].question);
+  //set up listeners
 
   $("#js-startButton").on('click', function(event){
     $(".js-question-body").toggleClass("hidden");
     $(".js-welcome-screen").toggleClass("hidden");
     $(".js-quiz-start").toggleClass("hidden");
     $(".js-quiz-progress").toggleClass("hidden");
+    runQuizModule();
   });
 
-  function loadNextQuestion(){
-    varNextQuestion = Math.floor(Math.random()*Quiz.questions.length);
-    renderQuestion(Quiz, varNextQuestion, $(".js-question-block"))
-  }
-  loadNextQuestion();
+  $(".js-submit-answer-button").on('click', function(event){
+    event.preventDefault();
+    var selectedOption = $("input:radio[name='answer']:checked").next("span").text();
+    if (!selectedOption) {
+      alert("you need to select and option");
+    } else {
+      TempQuiz.correctQuestion(selectedOption);
+    }
+  });
+
 });
 
 function generateUniqueQuestionSet(desiredUniqueQuestons) {
   uniqueSet = [];
   var i = 0;
   while(i < desiredUniqueQuestons) {
-    var randQuestionNumber = Math.floor(Math.random()*Quiz.questions.length);
+    var randQuestionNumber = Math.floor(Math.random()*QuizBank.questions.length);
     if(uniqueSet.indexOf(randQuestionNumber) == -1) {
       uniqueSet.push(randQuestionNumber);
       i++;
@@ -144,5 +191,3 @@ function generateUniqueQuestionSet(desiredUniqueQuestons) {
   }
   return uniqueSet;
 }
-
-alert(generateUniqueQuestionSet(5));

@@ -63,15 +63,24 @@ margin-left: 25px;
   border-radius: 5px;
 }
 
+
 .okButtonDiv{
   width: 40%;
   height: 200px;
   float: right;
 }
 
-.okButton{
+.submit-answer-button{
   font-size: 20px;
   margin-top: 15px;
+}
+
+h2.correct {
+  color: green;
+}
+
+h2.incorrect {
+  color: red;
 }
 
 nav{
