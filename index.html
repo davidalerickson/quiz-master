@@ -11,25 +11,30 @@
     </header>
     <div class="container">
       <main>
-        <div class="welcome-screen js-welcome-screen hidden">
+        <div class="welcome-screen js-welcome-screen">
           <h1>Welcome to Wacky Quiz!</h1>
+          <p>Click on "Start Quiz to test yourself on some really stupid subjects with ridiculous questions and equally absurd answers."</p>
+          <p>You may repeat this Quiz as many times as you like if you are so inclined, but I recommend a good pint of ale and a Netflix session instead."</p>
+          <h1>Good Luck!</h1>
         </div>
-        <div class="question-body js-question-body">
+        <div class="question-body js-question-body hidden">
           <form class="" action="index.html" method="post">
-            <div class="js-question-block">
+            <div class=" question-block js-question-block">
             </div>
+            <div class="okButtonDiv"><button class="okButton" type="submit" name="submit">Submit Answer</button></div>
           </form>
           <div class="response-correct">
-
+            <h2 class="correctIncorrect correct">You Answered Correctly</h2>
+            <p>The answer is: </p>
           </div>
         </div>
 
         <nav>
-          <div class="quiz-start">
+          <div class="js-quiz-start">
             <button class="startButton" id="js-startButton" type="button" name="button">Start Quiz</button>
           </div>
-          <div class="quiz-progress">
-
+          <div class="js-quiz-progress hidden">
+            <button class="nextButton js-nextButton hidden"type="button" name="next">Next &gt;</button>
           </div>
         </nav>
       </main>
