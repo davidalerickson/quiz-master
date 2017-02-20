@@ -93,11 +93,16 @@ nav{
   border-radius: 5px;
 }
 
+.js-quiz-start{
+  text-align: center;
+}
+
 .startButton{
   font-size: 20px;
 }
 .nextButton{
   font-size: 20px;
+  margin-left: 10px;
 }
 
 .hidden{

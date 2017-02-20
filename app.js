@@ -1,3 +1,4 @@
+var numQuestionsInQuiz = 5;
 var QuizBank = {
   questions: [{question: "What is the moon made of?",
                 answers: [
@@ -29,7 +30,7 @@ var QuizBank = {
                 {question: "How do you say SHAMELESS in Portuguese?",
                   answers: [
                     "Lula",
-                    "Sem Vegonha",
+                    "Sem Vergonha",
                     "Cunha",
                     "Temer"
                   ],
@@ -77,26 +78,41 @@ var QuizBank = {
 }
 
 TempQuiz = {questions:[],
+            welcomeScreen: 1,
             currentQuestion: 0,
+            currentCorrect: 0,
             correctQuestion: function(answer) {
               // alert("the answer selected is: " + answer);
               // alert("the correct answer  is: " + this.questions[this.currentQuestion].correctAnswer);
+              // alert(this.currentQuestion);
               var CorrectAnswer = this.questions[this.currentQuestion].correctAnswer;
               if(answer === CorrectAnswer) {
-                renderAnswer(1, CorrectAnswer);//correct
+                renderAnswer(1, CorrectAnswer, 0);//correct
+                this.currentCorrect++;
               } else {
-                renderAnswer(0, CorrectAnswer);//incorrect
+                renderAnswer(0, CorrectAnswer, 0);//incorrect
+              }
+              renderNav($(".js-nav"));
+              if(this.currentQuestion < this.questions.length) {
+                this.currentQuestion++;//quix still running
+              }
+              if(this.currentQuestion === this.questions.length){
+                renderAnswer("", "", 1);//end of quiz
+                $(".js-submit-answer-button").toggleClass("hidden");
               }
             }
 };
 
 //State Modification functions
 function initalizeTempQuiz() {
-  var questionOrderInArray = generateUniqueQuestionSet(5);
+  TempQuiz.questions = [];
+  var questionOrderInArray = generateUniqueQuestionSet(numQuestionsInQuiz);
     questionOrderInArray.forEach(function(questionNum) {
       TempQuiz.questions.push(QuizBank.questions[questionNum]);
+      TempQuiz.currentQuestion = 0;
+      TempQuiz.currentCorrect = 0;
       // alert(questionOrderInArray);
-      return 5;
+      return numQuestionsInQuiz;
     });
 }
 
@@ -104,8 +120,9 @@ function runQuizModule() {
   numQuestions = initalizeTempQuiz();
   var currentQuestion = TempQuiz.currentQuestion;
   renderQuestion(TempQuiz, currentQuestion, $(".js-question-block"));
-
-  // alert(TempQuiz.questions[0].question);
+  renderNav($(".js-nav"));
+  renderAnswer("", "", 0);
+  alert(TempQuiz.questions[0].question);
 }
 
 var numCorrect = function(TempQuiz){
@@ -113,6 +130,26 @@ var numCorrect = function(TempQuiz){
 };
 
 //render functions
+
+var renderWelcomeScreen = function(element){
+  var welcomeHTML = `
+  <h1>Welcome to Wacky Quiz!</h1>
+  <p>Click on "Start Quiz to test yourself on some really stupid subjects with ridiculous questions and equally absurd answers."</p>
+  <p>You may repeat this Quiz as many times as you like if you are so inclined, but I recommend a good pint of ale and a Netflix session instead."</p>
+  <h1>Good Luck!</h1>
+  <div class="js-quiz-start">
+    <button class="startButton" id="js-startButton" type="button" name="button">Start Quiz</button>
+  </div>
+  `;
+  element.html(welcomeHTML);
+  //set up listener for start button
+  $("#js-startButton").on('click', function(event){
+    $(".js-quiz-start").toggleClass("hidden");
+    $(".js-response-correct").toggleClass("hidden");
+    runQuizModule();
+  });
+}
+
 var renderQuestion = function(TempQuiz, questionNumber, element){
   var question = TempQuiz.questions[questionNumber].question;
   var answer1 = TempQuiz.questions[questionNumber].answers[0];
@@ -121,6 +158,7 @@ var renderQuestion = function(TempQuiz, questionNumber, element){
   var answer4 = TempQuiz.questions[questionNumber].answers[3];
 
   var questionHTML  = `
+  <form class="" action="index.html" method="post">
   <div class="theQuestion">
     <h3 class = "question js-question">${question}</h3>
   </div>
@@ -131,13 +169,32 @@ var renderQuestion = function(TempQuiz, questionNumber, element){
     <input type="radio" class="radioAns js-radio3" name="answer" value="Answer 3"><span class ="answer-text js-answer-text">${answer3}</span><br>
     <input type="radio" class="radioAns js-radio4" name="answer" value="Answer 4"><span class ="answer-text js-answer-text">${answer4}</span><br>
   </div>
+  <div class="okButtonDiv"><button class="submit-answer-button js-submit-answer-button" type="submit" name="submit">Submit Answer</button></div>
+  </form>
   `;
   element.html(questionHTML);
+  //bind the event listeners
+  $(".js-submit-answer-button").on('click', function(event){
+    event.preventDefault();
+    var btnText = $(".js-submit-answer-button").text();
+    if(btnText == "Next >") {
+      renderQuestion(TempQuiz, TempQuiz.currentQuestion, $(".js-question-block"));
+    }
+    var selectedOption = $("input:radio[name='answer']:checked").next("span").text();
+    if (!selectedOption) {
+      renderTheError("you need to select an option", $(".js-response-correct"));
+    } else {
+      $("input[type=radio]").attr("disabled", true);
+      $(".js-submit-answer-button").html("Next &gt;");
+      TempQuiz.correctQuestion(selectedOption);
+    }
+  });
+  renderNav($(".js-nav"));
 }
 
-var renderAnswer = function(correct, correctAnswer) {
-  alert("Correct: " + correct);
-  alert(correctAnswer);
+var renderAnswer = function(correct, correctAnswer, isEnd) {
+  // alert("Correct: " + correct);
+  // alert(correctAnswer);
 
   var element = $(".js-response-correct");
   var correctHTML = `
@@ -148,36 +205,71 @@ var renderAnswer = function(correct, correctAnswer) {
   <h2 class="incorrect">You are WRONG!</h2>
   <p>The answer is: ${correctAnswer}</p>
   `;
-  if(correct){
-    element.html(correctHTML);
+  var theEndHTML = `
+  <h2>End of Quiz <button class="repeat-quiz-button" id="js-repeat-quiz-button" type="button" name="button">Repeat Quiz</button></h2>
+  <p>You got ${TempQuiz.currentCorrect} of ${TempQuiz.questions.length} correct.
+  `;
+
+  if(isEnd) {
+    if(correct) {
+      element.html(`${correctHTML} ${theEndHTML}`);
+    } else {
+      element.html(`${incorrectHTML} ${theEndHTML}`);
+    }
+
+    $("#js-repeat-quiz-button").on('click', function(event){
+      // alert("repeat quiz clicked");
+      renderWelcomeScreen($(".js-question-block"));
+      //$(".js-response-correct").toggleClass("hidden");
+      runQuizModule();
+    });
   } else {
-    element.html(incorrectHTML);
+    if(correct){
+      element.html(correctHTML);
+    } else if(correct === 0){
+      element.html(incorrectHTML);
+    } else {
+      element.html("<h3>Start of Quiz - Please Choose an answer.</h3>");
+    }
   }
 }
 
+var renderTheError = function(errorMsg, element) {
+  var errorHTML;
+  var btnText = $(".js-submit-answer-button").text();
+  if(btnText == "Submit Answer") {
+    errorHTML = `<h2>Choose an answer</h2>`;
+  } else {
+    errorHTML = `<h2 class="incorrect">Are you Stupid</h2>
+    <p>You have to choose an answer, Duh.</p>
+    `;
+  }
+  element.html(errorHTML);
+}
+
+var renderNav = function(element) {
+  var NavHTML = `
+  <div class="js-quiz-progress">
+    <span>question ${TempQuiz.currentQuestion + 1} of  ${TempQuiz.questions.length} - (${TempQuiz.currentCorrect} correct)</span>
+  </div>  `;
+  element.html(NavHTML);
+}
+
+var renderStartQuizButton = function(element) {
+  startQuizHTML = `
+  <div class="c">
+    <button class="startButton" id="js-startButton" type="button" name="button">Start Quiz</button>
+  </div>
+  `;
+  element.html(startQuizHTML);
+}
+
+
 $(function(){
+  renderWelcomeScreen($(".js-question-block"));
+});//Jquery Function
 
-  //set up listeners
 
-  $("#js-startButton").on('click', function(event){
-    $(".js-question-body").toggleClass("hidden");
-    $(".js-welcome-screen").toggleClass("hidden");
-    $(".js-quiz-start").toggleClass("hidden");
-    $(".js-quiz-progress").toggleClass("hidden");
-    runQuizModule();
-  });
-
-  $(".js-submit-answer-button").on('click', function(event){
-    event.preventDefault();
-    var selectedOption = $("input:radio[name='answer']:checked").next("span").text();
-    if (!selectedOption) {
-      alert("you need to select and option");
-    } else {
-      TempQuiz.correctQuestion(selectedOption);
-    }
-  });
-
-});
 
 function generateUniqueQuestionSet(desiredUniqueQuestons) {
   uniqueSet = [];
