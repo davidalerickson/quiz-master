@@ -77,10 +77,18 @@ margin-left: 25px;
 
 h2.correct {
   color: green;
+  font-size: 16px;
+  padding: 0;
 }
 
 h2.incorrect {
   color: red;
+  font-size: 16px;
+  padding: 0;
+}
+
+span.black {
+  color: black;
 }
 
 nav{

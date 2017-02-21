@@ -82,9 +82,6 @@ TempQuiz = {questions:[],
             currentQuestion: 0,
             currentCorrect: 0,
             correctQuestion: function(answer) {
-              // alert("the answer selected is: " + answer);
-              // alert("the correct answer  is: " + this.questions[this.currentQuestion].correctAnswer);
-              // alert(this.currentQuestion);
               var CorrectAnswer = this.questions[this.currentQuestion].correctAnswer;
               if(answer === CorrectAnswer) {
                 renderAnswer(1, CorrectAnswer, 0);//correct
@@ -97,7 +94,7 @@ TempQuiz = {questions:[],
                 this.currentQuestion++;//quix still running
               }
               if(this.currentQuestion === this.questions.length){
-                renderAnswer("", "", 1);//end of quiz
+                renderAnswer("", CorrectAnswer, 1);//end of quiz
                 $(".js-submit-answer-button").toggleClass("hidden");
               }
             }
@@ -111,7 +108,6 @@ function initalizeTempQuiz() {
       TempQuiz.questions.push(QuizBank.questions[questionNum]);
       TempQuiz.currentQuestion = 0;
       TempQuiz.currentCorrect = 0;
-      // alert(questionOrderInArray);
       return numQuestionsInQuiz;
     });
 }
@@ -122,7 +118,6 @@ function runQuizModule() {
   renderQuestion(TempQuiz, currentQuestion, $(".js-question-block"));
   renderNav($(".js-nav"));
   renderAnswer("", "", 0);
-  alert(TempQuiz.questions[0].question);
 }
 
 var numCorrect = function(TempQuiz){
@@ -193,21 +188,17 @@ var renderQuestion = function(TempQuiz, questionNumber, element){
 }
 
 var renderAnswer = function(correct, correctAnswer, isEnd) {
-  // alert("Correct: " + correct);
-  // alert(correctAnswer);
 
   var element = $(".js-response-correct");
   var correctHTML = `
-  <h2 class="correct">You Answered Correctly!</h2>
-  <p>The answer is: ${correctAnswer}</p>
+  <h2 class="correct">You Answered Correctly! <span class="black">The answer is: ${correctAnswer}</span></h2>
+  <p></p>
   `;
   var incorrectHTML = `
-  <h2 class="incorrect">You are WRONG!</h2>
-  <p>The answer is: ${correctAnswer}</p>
+  <h2 class="incorrect">You are WRONG!  <span class="black">The answer is: ${correctAnswer}</span></h2>
   `;
   var theEndHTML = `
-  <h2>End of Quiz <button class="repeat-quiz-button" id="js-repeat-quiz-button" type="button" name="button">Repeat Quiz</button></h2>
-  <p>You got ${TempQuiz.currentCorrect} of ${TempQuiz.questions.length} correct.
+  <h3>End of Quiz - You got ${TempQuiz.currentCorrect} of ${TempQuiz.questions.length} correct. <button class="repeat-quiz-button" id="js-repeat-quiz-button" type="button" name="button">Repeat Quiz</button></h3>
   `;
 
   if(isEnd) {
@@ -218,9 +209,7 @@ var renderAnswer = function(correct, correctAnswer, isEnd) {
     }
 
     $("#js-repeat-quiz-button").on('click', function(event){
-      // alert("repeat quiz clicked");
       renderWelcomeScreen($(".js-question-block"));
-      //$(".js-response-correct").toggleClass("hidden");
       runQuizModule();
     });
   } else {
